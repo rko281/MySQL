@@ -1,0 +1,224 @@
+﻿| package |
+package := Package name: 'MySQL-Tests'.
+package paxVersion: 1;
+	basicComment: ''.
+
+package classNames
+	add: #MySQLBinaryReaderTest;
+	add: #MySQLBinaryRowDataNullBitMapTest;
+	add: #MySQLBindParameterBooleanTest;
+	add: #MySQLBindParameterDateTimeTest;
+	add: #MySQLBindParameterIntegerTest;
+	add: #MySQLBindParameterNullTest;
+	add: #MySQLBindParameterRealTest;
+	add: #MySQLBindParameterStringBlobTest;
+	add: #MySQLCommandExecuteTest;
+	add: #MySQLCommandsTest;
+	add: #MySQLDriverTest;
+	add: #MySQLHelperTest;
+	add: #MySQLMockSocket;
+	add: #MySQLMultiStatementTest;
+	add: #MySQLNetworkPacketTest;
+	add: #MySQLNetworkSessionTest;
+	add: #MySQLQueryStatusTest;
+	add: #MySQLServerStatementFetchTest;
+	add: #MySQLServerStatementInputConversionTest;
+	add: #MySQLServerStatementInputTest;
+	add: #MySQLServerStatementReadStringTest;
+	add: #MySQLStatementParameterTest;
+	add: #MySQLStatementReadTest;
+	add: #MySQLTestCase;
+	add: #MySQLTestFixture;
+	add: #MySQLTestResource;
+	yourself.
+
+package methodNames
+	add: #MySQLNetworkSession -> #socket:;
+	yourself.
+
+package binaryGlobalNames: (Set new
+	yourself).
+
+package globalAliases: (Set new
+	yourself).
+
+package setPrerequisites: #(
+	'..\Core\Object Arts\Dolphin\Base\Dolphin'
+	'..\Core\Object Arts\Dolphin\Base\Dolphin Legacy Date & Time'
+	'MySQL'
+	'..\Core\Contributions\Camp Smalltalk\SUnit\SUnit').
+
+package!
+
+"Class Definitions"!
+
+Object subclass: #MySQLMockSocket
+	instanceVariableNames: 'stream'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+Object subclass: #MySQLTestFixture
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+TestCase subclass: #MySQLBinaryReaderTest
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+TestCase subclass: #MySQLBinaryRowDataNullBitMapTest
+	instanceVariableNames: 'row'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+TestCase subclass: #MySQLBindParameterBooleanTest
+	instanceVariableNames: 'theParam'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+TestCase subclass: #MySQLBindParameterDateTimeTest
+	instanceVariableNames: 'theParam'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+TestCase subclass: #MySQLBindParameterIntegerTest
+	instanceVariableNames: 'theParam'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+TestCase subclass: #MySQLBindParameterNullTest
+	instanceVariableNames: 'theParam'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+TestCase subclass: #MySQLBindParameterRealTest
+	instanceVariableNames: 'theParam'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+TestCase subclass: #MySQLBindParameterStringBlobTest
+	instanceVariableNames: 'theParam'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+TestCase subclass: #MySQLCommandExecuteTest
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+TestCase subclass: #MySQLHelperTest
+	instanceVariableNames: 'pwd'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+TestCase subclass: #MySQLNetworkPacketTest
+	instanceVariableNames: 'ioStream'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+TestCase subclass: #MySQLNetworkSessionTest
+	instanceVariableNames: 'session ioStream maxLen'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+TestCase subclass: #MySQLStatementParameterTest
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+TestCase subclass: #MySQLTestCase
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLTestCase subclass: #MySQLCommandsTest
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLTestCase subclass: #MySQLDriverTest
+	instanceVariableNames: 'connector'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: 'protocol'!
+
+MySQLTestCase subclass: #MySQLMultiStatementTest
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLTestCase subclass: #MySQLQueryStatusTest
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLTestCase subclass: #MySQLServerStatementFetchTest
+	instanceVariableNames: 'stmt'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLTestCase subclass: #MySQLServerStatementInputConversionTest
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLTestCase subclass: #MySQLServerStatementInputTest
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLTestCase subclass: #MySQLServerStatementReadStringTest
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLTestCase subclass: #MySQLStatementReadTest
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+TestResource subclass: #MySQLTestResource
+	instanceVariableNames: 'conn testConn'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+"Loose Methods"!
+
+!MySQLNetworkSession methodsFor!
+
+socket: aSocket
+
+	socket := aSocket! !
+
+!MySQLNetworkSession categoriesForMethods!
+socket:!accessing!public! !
+!
+
+"End of package definition"!
+

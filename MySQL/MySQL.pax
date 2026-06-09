@@ -1,0 +1,645 @@
+﻿| package |
+package := Package name: 'MySQL'.
+package paxVersion: 1;
+	basicComment: 'MySQL for Dolphin
+Native (non-ODBC) MySQL interface for Dolphin Smalltalk.
+
+Based on the Pharo implementation from https://github.com/pharo-rdbms
+
+https://github.com/rko281/MySQL'.
+
+package classNames
+	add: #MySQL323Scramble;
+	add: #MySQLBinaryReader;
+	add: #MySQLBinaryRowData;
+	add: #MySQLBindError;
+	add: #MySQLBindParameter;
+	add: #MySQLClientAuth;
+	add: #MySQLCommand;
+	add: #MySQLCommandBase;
+	add: #MySQLCommandChangeUser;
+	add: #MySQLCommandCloseStatement;
+	add: #MySQLCommandExecute;
+	add: #MySQLCommandFetch;
+	add: #MySQLCommandLongData;
+	add: #MySQLCommandPing;
+	add: #MySQLCommandPrepare;
+	add: #MySQLCommandQuery;
+	add: #MySQLCommandQuit;
+	add: #MySQLCommandResetStatement;
+	add: #MySQLCommandWithQuery;
+	add: #MySQLCommandWithResults;
+	add: #MySQLCommandWithStatement;
+	add: #MySQLComplexResult;
+	add: #MySQLDriver;
+	add: #MySQLDriverError;
+	add: #MySQLDriverSpec;
+	add: #MySQLDriverStatement;
+	add: #MySQLEof;
+	add: #MySQLError;
+	add: #MySQLField;
+	add: #MySQLHandshake;
+	add: #MySQLHelper;
+	add: #MySQLInvalidPacketError;
+	add: #MySQLInvalidRowAccess;
+	add: #MySQLNameLookupFailure;
+	add: #MySQLNetworkPacket;
+	add: #MySQLNetworkSession;
+	add: #MySQLNoConnectionError;
+	add: #MySQLOkay;
+	add: #MySQLPacket;
+	add: #MySQLPrepareOkay;
+	add: #MySQLPrepareResponse;
+	add: #MySQLQueryRowData;
+	add: #MySQLResult;
+	add: #MySQLResultSet;
+	add: #MySQLResultSetHeader;
+	add: #MySQLRowData;
+	add: #MySQLServerStatus;
+	add: #MySQLStatementError;
+	add: #MySQLStringRowData;
+	add: #MySQLTypes;
+	add: #MySQLUnsuportedAuthError;
+	add: #MySQLUnsupportedProtocolError;
+	yourself.
+
+package methodNames
+	add: #ByteArray -> #mySQLParamTypeFor:;
+	add: #Character -> #asByteArray;
+	add: #Character -> #mySQLParamTypeFor:;
+	add: #Date -> #mySQLParamTypeFor:;
+	add: #DateAndTime -> #mySQLParamTypeFor:;
+	add: #Duration -> #mySQLParamSign;
+	add: #Duration -> #mySQLParamTypeFor:;
+	add: #GUID -> #mySQLParamTypeFor:;
+	add: #Integer -> #mySQLParamTypeFor:;
+	add: #Number -> #mySQLParamSign;
+	add: #Number -> #mySQLParamTypeFor:;
+	add: #Object -> #mySQLParamSign;
+	add: #Object -> #mySQLParamTypeFor:;
+	add: #ScaledDecimal -> #mySQLParamTypeFor:;
+	add: #Socket2 -> #getBooleanOption:level:;
+	add: #Socket2 -> #getSocketOption:level:into:;
+	add: #Socket2 -> #setBooleanOption:level:value:;
+	add: #Socket2 -> #setSocketOption:level:value:;
+	add: #String -> #mySQLParamTypeFor:;
+	add: #Time -> #mySQLParamTypeFor:;
+	add: #TimeStamp -> #mySQLParamTypeFor:;
+	add: #UndefinedObject -> #mySQLParamTypeFor:;
+	yourself.
+
+package binaryGlobalNames: (Set new
+	yourself).
+
+package globalAliases: (Set new
+	yourself).
+
+package setPrerequisites: #(
+	'..\Core\Object Arts\Dolphin\Base\Dolphin'
+	'..\Core\Object Arts\Dolphin\Base\Dolphin Legacy Date & Time'
+	'..\Core\Object Arts\Dolphin\Sockets\Dolphin Sockets'
+	'..\Core\Object Arts\Dolphin\DolphinSure\DolphinSure'
+	'..\Core\Contributions\svenc\STON\STON-Core').
+
+package!
+
+"Class Definitions"!
+
+Object subclass: #MySQLBinaryReader
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: 'defaultInstance'!
+
+Object subclass: #MySQLBindParameter
+	instanceVariableNames: 'paramValue paramType newParamBound unsignedFlag declaredUnsigned sentAsLongData'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+Object subclass: #MySQLCommandBase
+	instanceVariableNames: 'session errorDict'
+	classVariableNames: 'ComChangeUser ComCreateDb ComDebug ComDropDb ComFieldList ComInitDb ComPing ComQuery ComQuit ComSetOption ComSleep ComStat ComStmtClose ComStmtExecute ComStmtFetch ComStmtPrepare ComStmtReset ComStmtSendLongData'
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+Object subclass: #MySQLDriver
+	instanceVariableNames: 'netSession handshakeInfo'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+Object subclass: #MySQLDriverSpec
+	instanceVariableNames: 'host port user password database options'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+Object subclass: #MySQLDriverStatement
+	instanceVariableNames: 'driver typeMapResults stmtId params rsContext cursoredFetch fetchSize needsReset'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+Object subclass: #MySQLHelper
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: 'seedOne maxValue seedTwo'!
+
+Object subclass: #MySQLNetworkPacket
+	instanceVariableNames: 'length number data'
+	classVariableNames: 'MaxPacketLength'
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+Object subclass: #MySQLNetworkSession
+	instanceVariableNames: 'socket nextPacketNumber peekData logStream inputQueue outputQueue process'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+Object subclass: #MySQLPacket
+	instanceVariableNames: 'inStream discriminator'
+	classVariableNames: 'CapCompress CapConnectWithDb CapFoundRows CapIgnoreSigpipe CapIgnoreSpace CapInteractive CapLocalFiles CapLongFlag CapLongPassword CapMultiResults CapMultiStatements CapNoSchema CapOdbc CapProtocol41 CapReserved CapSecureConnection CapSsl CapTransactions'
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+Object subclass: #MySQLServerStatus
+	instanceVariableNames: ''
+	classVariableNames: 'ServerMoreResultsExist ServerQueryNoGoodIndexUsed ServerQueryNoIndexUsed ServerStatusAutoCommit ServerStatusCursorExists ServerStatusDbDropped ServerStatusInTranssaction ServerStatusLastRowSent ServerStatusNoBackslashEscapes'
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+Object subclass: #MySQLTypes
+	instanceVariableNames: ''
+	classVariableNames: 'TypeBIT TypeBLOB TypeDATE TypeDATETIME TypeDECIMAL TypeDOUBLE TypeENUM TypeFLOAT TypeGEOMETRY TypeINT24 TypeJSON TypeLONG TypeLONGBLOB TypeLONGLONG TypeMEDIUMBLOB TypeNEWDATE TypeNEWDECIMAL TypeNULL TypeSET TypeSHORT TypeSTRING TypeTIME TypeTIMESTAMP TypeTINY TypeTINYBLOB TypeVARCHAR TypeVARSTRING TypeYEAR'
+	poolDictionaries: ''
+	classInstanceVariableNames: 'blobTypes dateTimeTypes integerTypes stringTypes realTypes'!
+
+Error subclass: #MySQLDriverError
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLDriverError subclass: #MySQLBindError
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLDriverError subclass: #MySQLInvalidPacketError
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLDriverError subclass: #MySQLInvalidRowAccess
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLDriverError subclass: #MySQLNameLookupFailure
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLDriverError subclass: #MySQLNoConnectionError
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLDriverError subclass: #MySQLStatementError
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLDriverError subclass: #MySQLUnsuportedAuthError
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLDriverError subclass: #MySQLUnsupportedProtocolError
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLCommandBase subclass: #MySQLCommandChangeUser
+	instanceVariableNames: 'user password database charset scrambleBuff scrambledPassword'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLCommandBase subclass: #MySQLCommandCloseStatement
+	instanceVariableNames: 'statementId'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLCommandBase subclass: #MySQLCommandLongData
+	instanceVariableNames: 'dataBytes statementId paramNum'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLCommandBase subclass: #MySQLCommandPing
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLCommandBase subclass: #MySQLCommandQuit
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLCommandBase subclass: #MySQLCommandResetStatement
+	instanceVariableNames: 'statementId'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLCommandBase subclass: #MySQLCommandWithResults
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLCommandWithResults subclass: #MySQLCommandWithQuery
+	instanceVariableNames: 'query'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLCommandWithResults subclass: #MySQLCommandWithStatement
+	instanceVariableNames: 'stmtId mapResultsToNativeTypes'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLCommandWithQuery subclass: #MySQLCommandPrepare
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLCommandWithQuery subclass: #MySQLCommandQuery
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLCommandWithStatement subclass: #MySQLCommandExecute
+	instanceVariableNames: 'params cursoredFetch'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLCommandWithStatement subclass: #MySQLCommandFetch
+	instanceVariableNames: 'numRows resultSetContext'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLPacket subclass: #MySQL323Scramble
+	instanceVariableNames: 'scrambleBuff password'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLPacket subclass: #MySQLClientAuth
+	instanceVariableNames: 'user password database scrambleBuff clientCaps charset serverCaps scrambleBuffMore'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLPacket subclass: #MySQLCommand
+	instanceVariableNames: 'command arg'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLPacket subclass: #MySQLEof
+	instanceVariableNames: 'fieldCount warningCount serverStatus'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLPacket subclass: #MySQLField
+	instanceVariableNames: 'catalog db table orgTable name orgName charSet type flags default decimals length'
+	classVariableNames: 'AutoIncrFlag BinaryFlag BlobFlag EnumFlag MultiKeyFlag NotNullFlag PrimaryKeyFlag SetFlag TimestampFlag UniqueKeyFlag UnsignedFlag ZeroFillFlag'
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLPacket subclass: #MySQLHandshake
+	instanceVariableNames: 'protocolVer serverVer threadId scrambleBuff serverCap serverLang scrambleBuffMore serverStatus'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLPacket subclass: #MySQLPrepareOkay
+	instanceVariableNames: 'warningCount numColumns numParams stmtId'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLPacket subclass: #MySQLResult
+	instanceVariableNames: 'nextResult'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLPacket subclass: #MySQLResultSetHeader
+	instanceVariableNames: 'fieldCount extra'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLPacket subclass: #MySQLRowData
+	instanceVariableNames: 'columnValues'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLResult subclass: #MySQLComplexResult
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLResult subclass: #MySQLError
+	instanceVariableNames: 'fieldCount errNo sqlStateMarker sqlState message'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLResult subclass: #MySQLOkay
+	instanceVariableNames: 'message fieldCount affectedRows insertId warningCount serverStatus'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLComplexResult subclass: #MySQLPrepareResponse
+	instanceVariableNames: 'prepareOkay paramDescriptors paramEof columnDescriptors columnEof'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLComplexResult subclass: #MySQLResultSet
+	instanceVariableNames: 'header fields fieldsEof rows rowsEof rowsStream statement'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLRowData subclass: #MySQLBinaryRowData
+	instanceVariableNames: 'header nullBitMap columnDescriptors'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLRowData subclass: #MySQLQueryRowData
+	instanceVariableNames: 'fields'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLBinaryRowData subclass: #MySQLStringRowData
+	instanceVariableNames: 'columnStrings'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+"Loose Methods"!
+
+!ByteArray methodsFor!
+
+mySQLParamTypeFor: aMySQLBindParameter
+
+	self size < 16r100 ifTrue: [^MySQLTypes.TypeTINYBLOB].
+	self size < 16r10000 ifTrue: [^MySQLTypes.TypeBLOB].
+	self size < 16r1000000 ifTrue: [^MySQLTypes.TypeMEDIUMBLOB].
+
+	^MySQLTypes.TypeLONGBLOB! !
+
+!ByteArray categoriesForMethods!
+mySQLParamTypeFor:!accessing!public! !
+!
+
+!Character methodsFor!
+
+asByteArray
+
+	^self asString asByteArray!
+
+mySQLParamTypeFor: aMySQLBindParameter
+
+	^MySQLTypes.TypeSTRING! !
+
+!Character categoriesForMethods!
+asByteArray!converting!public! !
+mySQLParamTypeFor:!accessing!public! !
+!
+
+!Date methodsFor!
+
+mySQLParamTypeFor: aMySQLBindParameter
+
+	^MySQLTypes.TypeDATE! !
+
+!Date categoriesForMethods!
+mySQLParamTypeFor:!accessing!public! !
+!
+
+!DateAndTime methodsFor!
+
+mySQLParamTypeFor: aMySQLBindParameter
+
+	^MySQLTypes.TypeDATETIME! !
+
+!DateAndTime categoriesForMethods!
+mySQLParamTypeFor:!accessing!public! !
+!
+
+!Duration methodsFor!
+
+mySQLParamSign
+
+	^self positive!
+
+mySQLParamTypeFor: aMySQLBindParameter
+
+	^MySQLTypes.TypeTIME! !
+
+!Duration categoriesForMethods!
+mySQLParamSign!accessing!public! !
+mySQLParamTypeFor:!accessing!public! !
+!
+
+!GUID methodsFor!
+
+mySQLParamTypeFor: aMySQLBindParameter
+
+	^MySQLTypes.TypeTINYBLOB! !
+
+!GUID categoriesForMethods!
+mySQLParamTypeFor:!accessing!public! !
+!
+
+!Integer methodsFor!
+
+mySQLParamTypeFor: aMySQLBindParameter
+
+	(aMySQLBindParameter isInTinyIntRange: self) ifTrue: [^ MySQLTypes.TypeTINY].
+	(aMySQLBindParameter isInSmallIntRange: self) ifTrue: [^ MySQLTypes.TypeSHORT].
+	(aMySQLBindParameter isInLongIntRange: self) ifTrue: [^ MySQLTypes.TypeLONG].
+	(aMySQLBindParameter isInBigIntRange: self) ifTrue: [^ MySQLTypes.TypeLONGLONG].
+
+	MySQLBindError signal: 'Supplied integer does not have a matching database type'! !
+
+!Integer categoriesForMethods!
+mySQLParamTypeFor:!accessing!public! !
+!
+
+!Number methodsFor!
+
+mySQLParamSign
+
+	^self positive!
+
+mySQLParamTypeFor: aMySQLBindParameter
+
+	^MySQLTypes.TypeDOUBLE! !
+
+!Number categoriesForMethods!
+mySQLParamSign!accessing!public! !
+mySQLParamTypeFor:!accessing!public! !
+!
+
+!Object methodsFor!
+
+mySQLParamSign
+
+	^true!
+
+mySQLParamTypeFor: aMySQLBindParameter
+
+	^MySQLTypes.TypeTINY! !
+
+!Object categoriesForMethods!
+mySQLParamSign!accessing!public! !
+mySQLParamTypeFor:!accessing!public! !
+!
+
+!ScaledDecimal methodsFor!
+
+mySQLParamTypeFor: aMySQLBindParameter
+
+	^MySQLTypes.TypeDECIMAL! !
+
+!ScaledDecimal categoriesForMethods!
+mySQLParamTypeFor:!accessing!public! !
+!
+
+!Socket2 methodsFor!
+
+getBooleanOption: option level: anInteger
+
+	| optval |
+
+	optval := AnsiString newFixed: 1.
+
+	self getSocketOption: option level: anInteger into: optval.
+
+	^optval first ~= $\x00!
+
+getSocketOption: option level: anInteger into: aString
+
+	| optlen |
+
+	optlen := SDWORD new.
+	optlen value: aString size.
+
+	(WS2_32Library default 
+		getsockopt: self asParameter
+		level:  anInteger
+		optname: option
+		optval: aString
+		optlen: optlen) = 0 ifFalse: [self socketError].
+
+	^aString first: optlen value!
+
+setBooleanOption: option level: anInteger value: aBoolean
+
+	| optval |
+
+	optval := AnsiString newFixed: 1.
+	optval at: 1 put: (Character value: aBoolean asDword).
+
+	self setSocketOption: option level: anInteger value: optval!
+
+setSocketOption: option level: anInteger value: aString
+
+	(WS2_32Library default 
+		setsockopt: self asParameter
+		level: anInteger
+		optname: option
+		optval: aString
+		optlen: aString size) = 0 ifFalse: [self socketError]! !
+
+!Socket2 categoriesForMethods!
+getBooleanOption:level:!operations!public! !
+getSocketOption:level:into:!operations!public! !
+setBooleanOption:level:value:!operations!public! !
+setSocketOption:level:value:!operations!public! !
+!
+
+!String methodsFor!
+
+mySQLParamTypeFor: aMySQLBindParameter
+
+	^MySQLTypes.TypeVARSTRING! !
+
+!String categoriesForMethods!
+mySQLParamTypeFor:!accessing!public! !
+!
+
+!Time methodsFor!
+
+mySQLParamTypeFor: aMySQLBindParameter
+
+	^MySQLTypes.TypeTIME! !
+
+!Time categoriesForMethods!
+mySQLParamTypeFor:!accessing!public! !
+!
+
+!TimeStamp methodsFor!
+
+mySQLParamTypeFor: aMySQLBindParameter
+
+	^MySQLTypes.TypeDATETIME! !
+
+!TimeStamp categoriesForMethods!
+mySQLParamTypeFor:!accessing!public! !
+!
+
+!UndefinedObject methodsFor!
+
+mySQLParamTypeFor: aMySQLBindParameter
+
+	^MySQLTypes.TypeNULL! !
+
+!UndefinedObject categoriesForMethods!
+mySQLParamTypeFor:!accessing!public! !
+!
+
+"End of package definition"!
+
