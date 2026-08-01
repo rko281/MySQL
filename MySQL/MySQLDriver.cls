@@ -16,13 +16,39 @@ MySQLDriver comment: 'Driver class for MySQL'!
 
 assertConnection	self connected ifFalse: [^ MySQLNoConnectionError signal: 'Driver is not connected'].	!
 
-changeUser: connSpec 	| com scrmbl |	self assertConnection.	com := MySQLCommandChangeUser onSession: netSession.	scrmbl := MySQLHelper secureScramble: handshakeInfo scrambleBuff , handshakeInfo scrambleBuffMore with: connSpec password .	com		user: connSpec user;		scrambledPassword: scrmbl;		database: connSpec db;		password: connSpec password;		scrambleBuff: handshakeInfo scrambleBuff;		charset: handshakeInfo serverLang.	^ com execute!
+changeUser: connSpec 
+	self assertConnection.
+
+	(connSpec isSecureConnection and: [netSession isSecureConnection not]) ifTrue: [MySQLUnsupportedProtocolError signal: 'Cannot switch to secured plugin on unsecured connection'].	
+	^(MySQLCommandChangeUser forDriver: self connSpec: connSpec) execute!
 
 commandQueryClass
 
 	^MySQLCommandQuery!
 
-connect: connSpec 	| handshake resp |		self connected ifTrue: [^ MySQLDriverError signal: 'Driver is already connected'].	netSession ifNil: [netSession := MySQLNetworkSession new].	netSession toHost: connSpec host andPort: connSpec port.	handshake := self readHandshake.	self writeAuthForHandshake: handshake onConnection: connSpec.	resp := self peekResponse.	resp isEof ifTrue: [		"Read the send short hash indicator: ainsgle eof(254) byte)"		self readResponse.		"This is an indication that comes from server if the password for this user		follows the old style (short hash) instead of the new style (long hash). 		We need to send back the 323 scramble"		self send323Scramble: handshake scrambleBuff password: connSpec password.		resp := self peekResponse]. 	resp isError ifTrue: [^ MySQLError from: netSession read].	resp isOkay ifTrue: [		self keepHandshakeInfo: handshake.		^ MySQLOkay from: netSession read].		MySQLDriverError signal: 'Unexpected response from server: data is not okay/error/eof'	!
+connect: connSpec 
+	| handshake resp |
+	
+	self connected ifTrue: [^ MySQLDriverError signal: 'Driver is already connected'].
+	netSession ifNil: [netSession := MySQLNetworkSession new].
+	netSession toHost: connSpec host andPort: connSpec port.
+
+	handshake := self readHandshake.
+	self writeAuthForHandshake: handshake onConnection: connSpec.
+
+	resp := self peekResponse.
+	resp isAuthSwitch 
+		ifTrue: [resp := self handleAuthSwitch: connSpec handshake: handshake]
+		ifFalse: [resp isAuthMoreData ifTrue: [resp := self handleAuthMoreData: connSpec]]. 
+
+	resp isError ifTrue: [^ MySQLError from: netSession read].
+	resp isOkay ifTrue: [
+		self keepHandshakeInfo: handshake.
+		^ MySQLOkay from: netSession read].
+
+	"Absorb the response"
+	netSession read.
+	MySQLDriverError signal: 'Unexpected response from server: data is not okay/error/authMoreData/authSwitch'!
 
 connected	^ netSession isNil not and: [netSession connected]	!
 
@@ -30,9 +56,41 @@ disconnect	self assertConnection.	(MySQLCommandQuit  onSession: netSession) ex
 
 errorFromResponse: resp	^ MySQLError from: resp data!
 
+handleAuthMoreData: connSpec	| buffer authMoreData |	buffer := netSession read.	authMoreData := MySQLAuthMoreData from: buffer.
+	netSession isSecureConnection ifFalse: [MySQLDriverError signal: 'Secure connection failure'].
+
+	authMoreData isFullAuthenticationRequest 
+		ifTrue: [netSession write: (connSpec password asByteArray, #[0])]
+		ifFalse: [authMoreData isAuthenticationComplete ifFalse: [MySQLUnsupportedAuthError signal: 'Unknown AuthMoreData packet value' with: authMoreData]].
+
+	^self peekResponse!
+
+handleAuthSwitch: connSpec handshake: handshake	| buffer authSwitch |	buffer := netSession read.
+	authSwitch := MySQLAuthSwitch from: buffer.
+	authSwitch isCachingSha2
+		ifTrue: [netSession isSecureConnection ifFalse: [MySQLUnsupportedAuthError signal: 'Cannot switch to secured plugin on unsecured connection']]
+		ifFalse: [authSwitch isNativePassword ifFalse: [MySQLUnsupportedAuthError signal: 'Unsupported AuthSwitch plugin type']].
+
+	authSwitch password: connSpec password.
+	netSession write: authSwitch scramble.
+
+	handshake 
+		pluginName: authSwitch pluginName;
+		scrambleBuff: authSwitch scrambleBuff.
+
+	^self peekResponse!
+
 handshakeInfo	^ handshakeInfo !
 
+isMariaDB
+
+	^'*MariaDB*' match: self versionString!
+
 keepHandshakeInfo: handshake	handshakeInfo := handshake!
+
+majorVersion
+
+	^Integer fromString: (self versionString upTo: $.)!
 
 netSession	^ netSession	!
 
@@ -55,31 +113,51 @@ readHandshake	| buffer handshake |	buffer := netSession read.	handshake := 
 
 readResponse	| buffer resp |		buffer := netSession read.	resp := MySQLPacket from: buffer.	^ resp!
 
-send323Scramble: seed password: password	| scrmblPkt |	scrmblPkt := MySQL323Scramble new.	scrmblPkt password: password; scrambleBuff: seed.	self writePacket: scrmblPkt.	!
+versionString
 
-writeAuthForHandshake: handshake onConnection: connSpec	| auth |	handshake supportsProtocol41 		ifTrue: [auth := MySQLClientAuth new]		ifFalse: [MySQLUnsupportedProtocolError signal: 'Server does not support protocol version 41'].		auth		serverCaps: handshake serverCaps ;		charset: handshake serverLang ;		user: connSpec user ;		password: connSpec password ;		database: connSpec db ;		scrambleBuff: handshake scrambleBuff ;		scrambleBuffMore: handshake scrambleBuffMore .			self writePacket: auth !
+	^(self query: 'select version()') next at: 1!
+
+writeAuthForHandshake: handshake onConnection: connSpec
+	| clientAuth |
+
+	clientAuth := 
+		handshake clientAuth
+			user: connSpec user ;
+			password: connSpec password ;
+			database: connSpec db ;
+			options: connSpec options ;
+			yourself.
+
+	connSpec isSecureConnection ifTrue: 
+		[netSession write: clientAuth authHeader.
+		netSession secureConnection].
+	self writePacket: clientAuth!
 
 writePacket: packet	| buffer |		buffer := packet write.	netSession  write: buffer.! !
 
 !MySQLDriver categoriesForMethods!
-assertConnection!public!testing! !
-changeUser:!accessing!private! !
+assertConnection!private!testing! !
+changeUser:!operations!public! !
 commandQueryClass!accessing!private! !
-connect:!accessing!private! !
+connect:!operations!public! !
 connected!public!testing! !
-disconnect!accessing!private! !
+disconnect!operations!public! !
 errorFromResponse:!private! !
+handleAuthMoreData:!private! !
+handleAuthSwitch:handshake:!private! !
 handshakeInfo!private! !
+isMariaDB!public!testing! !
 keepHandshakeInfo:!private! !
+majorVersion!accessing!public! !
 netSession!accessing!private! !
 okayFromResponse:!private! !
 peekResponse!private! !
-ping!accessing!private! !
-prepare:!accessing!private! !
-query:!accessing!private! !
+ping!operations!public! !
+prepare:!operations!public! !
+query:!operations!public! !
 readHandshake!private! !
 readResponse!private! !
-send323Scramble:password:!public!scrambling! !
+versionString!accessing!public! !
 writeAuthForHandshake:onConnection:!private! !
 writePacket:!private! !
 !

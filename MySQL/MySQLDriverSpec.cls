@@ -24,6 +24,17 @@ host	^ host!
 
 host: server	host := server!
 
+initialize
+
+	options := 0!
+
+isSecureConnection
+
+	^(options bitAnd: MySQLPacket.CapSsl) = MySQLPacket.CapSsl!
+
+options
+	^options!
+
 options: driverOptions	options := driverOptions!
 
 password	^ password!
@@ -36,7 +47,15 @@ port: serverPort	port := serverPort!
 
 user	^ user!
 
-user: userName	user := userName! !
+user: userName	user := userName!
+
+useSecureConnection
+
+	options := options bitOr: MySQLPacket.CapSsl!
+
+useUnsecuredConnection
+
+	self isSecureConnection ifTrue: [options := options - MySQLPacket.CapSsl]! !
 
 !MySQLDriverSpec categoriesForMethods!
 database:!accessing!public! !
@@ -44,6 +63,9 @@ db!accessing!public! !
 db:!accessing!public! !
 host!accessing!public! !
 host:!accessing!public! !
+initialize!initializing!public! !
+isSecureConnection!public!testing! !
+options!accessing!public! !
 options:!accessing!public! !
 password!accessing!public! !
 password:!accessing!public! !
@@ -51,5 +73,17 @@ port!accessing!public! !
 port:!accessing!public! !
 user!accessing!public! !
 user:!accessing!public! !
+useSecureConnection!initializing!public! !
+useUnsecuredConnection!initializing!public! !
+!
+
+!MySQLDriverSpec class methodsFor!
+
+new
+
+	^super new initialize! !
+
+!MySQLDriverSpec class categoriesForMethods!
+new!instance creation!public! !
 !
 

@@ -78,8 +78,6 @@ isRebound	^ newParamBound 	!
 
 isUnsigned	^ unsignedFlag 	!
 
-longIntRange	^ self isDeclaredUnsigned 		ifTrue: [16r00000000 to: 16rFFFFFFFF] 		ifFalse: [-16r80000000 to: 16r7FFFFFFF].!
-
 paramType	^ paramType 	!
 
 resetReboundFlag	newParamBound := false	!
@@ -87,8 +85,6 @@ resetReboundFlag	newParamBound := false	!
 sentAsLongData	^ sentAsLongData	!
 
 sentAsLongData: aBoolean	sentAsLongData := aBoolean	!
-
-smallIntRange	^ self isDeclaredUnsigned ifTrue: [16r0000 to: 16rFFFF] ifFalse: [-16r8000 to: 16r7FFF].!
 
 storableIntegerValueOfSize: size 	(paramValue isKindOf: Boolean) ifTrue: [^ paramValue ifTrue: [1] ifFalse: [0]].	^ paramValue negative 		ifTrue: [ (1 << (size * 8)) + paramValue ]		ifFalse: [ paramValue ]!
 
@@ -119,8 +115,6 @@ timeBytes
 	strm := ReadWriteStream on: (ByteArray new: 12).	"length byte plus rest"	dur := Duration seconds: paramValue asSeconds.	length := 0.	strm nextPut: length.	"will re-adjust this as different conditions are found"	dur negative		ifTrue: [ strm nextPut: 1 ]		ifFalse: [ strm nextPut: 0 ].	days := dur days.	strm		nextPut: (days byteAt: 1);		nextPut: (days byteAt: 2);		nextPut: (days byteAt: 3);		nextPut: (days byteAt: 4).	strm		nextPut: (dur hours byteAt: 1);		nextPut: (dur minutes byteAt: 1);		nextPut: (dur seconds truncated byteAt: 1).	micros := dur nanoseconds // 1000.	strm		nextPut: (micros byteAt: 1);		nextPut: (micros byteAt: 2);		nextPut: (micros byteAt: 3);		nextPut: (micros byteAt: 4).	"Update the length field now."	length := 11.	micros = 0		ifTrue: [ length := 7.	"no sub-seconds to send"			(dur hours = 0 and: [ dur minutes = 0 and: [ dur seconds = 0 ] ])				ifTrue: [ "no hh:mm:ss to send"					length := 4.					dur days = 0						ifTrue: [ length := 0 ] ] ].	length > 0		ifTrue: [ length := length + 1	"include sign byte" ].	^strm		reset;		nextPut: length;		reset;
 		next: length + 1 !
 
-tinyIntRange	^ self isDeclaredUnsigned ifTrue: [16r00 to: 16rFF] ifFalse: [-16r80 to: 16r7F].!
-
 value
 
 	^paramValue! !
@@ -144,18 +138,15 @@ isLongData!public!testing! !
 isNull!public!testing! !
 isRebound!public!testing! !
 isUnsigned!public!testing! !
-longIntRange!private! !
 paramType!accessing!public! !
 resetReboundFlag!accessing!public! !
 sentAsLongData!public!testing! !
 sentAsLongData:!accessing!public! !
-smallIntRange!private! !
 storableIntegerValueOfSize:!public!writes! !
 storeBinaryOn:!accessing!public! !
 stringOrBlobBytes!public!writes! !
 stringOrBlobBytesRaw!public!writes! !
 timeBytes!public!writes! !
-tinyIntRange!private! !
 value!accessing!public! !
 !
 

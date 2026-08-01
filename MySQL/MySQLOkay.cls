@@ -20,7 +20,7 @@ hasMoreResults	^ (serverStatus bitAnd: MySQLServerStatus moreResultsExist) ~= 0
 
 insertId	^ insertId !
 
-inTransaction	| autoCommit inTx |	autoCommit := (serverStatus bitAnd: MySQLServerStatus statusInTransaction) ~= 0.	inTx := (serverStatus bitAnd: MySQLServerStatus statusInTransaction) ~= 0.	^ autoCommit and: inTx	!
+inTransaction	| autoCommit inTx |	autoCommit := (serverStatus bitAnd: MySQLServerStatus statusInTransaction) ~= 0.	inTx := (serverStatus bitAnd: MySQLServerStatus statusInTransaction) ~= 0.	^ autoCommit & inTx	!
 
 isOkay	^ true!
 

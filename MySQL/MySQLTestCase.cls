@@ -14,6 +14,54 @@ MySQLTestCase comment: ''!
 
 !MySQLTestCase methodsFor!
 
+_createCachingSha2User: aBlock
+
+	"Private - Create a user who requires caching_sha2_password authentication.
+	aBlock is evaluated to carry out further tests whilst the user is extant (evaluated with connection spec for the user).
+	Not supported on MariaDB"
+
+	| connection resp connectionSpec |
+
+	connection := MySQLDriver new.
+	connection connect: self driverSpec.
+	connection isMariaDB ifTrue: [^self].
+
+	connectionSpec := self driverSpec.
+	connectionSpec 
+		database: nil;
+		user: (connectionSpec user, '_ssl').
+
+	resp := connection query: 'CREATE USER ''', connectionSpec user, '''@''%''IDENTIFIED WITH caching_sha2_password BY ''', connectionSpec password , ''';'.
+	resp isOkay ifFalse: [connection disconnect. self error: 'Could not create caching_sha2_password user'].
+	[aBlock value: connectionSpec] ensure: 
+		[resp := connection query: 'DROP USER ''', connectionSpec user, '''@''%'''.
+		resp isOkay ifFalse: [self error: 'Could not drop caching_sha2_password user'].
+		connection disconnect]!
+
+_createNativePasswordUser: aBlock
+
+	"Private - Create a user who requires mysql_native_password authentication.
+	aBlock is evaluated to carry out further tests whilst the user is extant (evaluated with connection spec for the user).
+	Not supported on newer MySQL installations"
+
+	| connection resp connectionSpec |
+
+	connection := MySQLDriver new.
+	connection connect: self driverSpec.
+	(connection isMariaDB not and: [connection majorVersion > 8]) ifTrue: [^self].
+
+	connectionSpec := self driverSpec.
+	connectionSpec 
+		database: nil;
+		user: (connectionSpec user, '_np').
+
+	resp := connection query: 'CREATE USER ''', connectionSpec user, '''@''%''IDENTIFIED WITH mysql_native_password BY ''', connectionSpec password , ''';'.
+	resp isOkay ifFalse: [connection disconnect. self error: 'Could not create mysql_native_password user'].
+	[aBlock value: connectionSpec] ensure: 
+		[resp := connection query: 'DROP USER ''', connectionSpec user, '''@''%'''.
+		resp isOkay ifFalse: [self error: 'Could not drop mysql_native_password user'].
+		connection disconnect]!
+
 cleanUpFixtureData	self class resourceClass current clearTestTables 	!
 
 configureNotStrict: connection	"Change the sql_mode for the current session test (in case of strict mode enabled)"		connection query: 'SET SESSION sql_mode = ''NO_ENGINE_SUBSTITUTION'';'.!
@@ -35,6 +83,8 @@ testConnection	^ self class resourceClass current testConnection	!
 withFixtures: fixtureNameList do: testBlock	fixtureNameList do: [:each | self loadOneFixture: each].	testBlock value: self resourceConnection 	! !
 
 !MySQLTestCase categoriesForMethods!
+_createCachingSha2User:!private!tests! !
+_createNativePasswordUser:!private!tests! !
 cleanUpFixtureData!cleanup!public! !
 configureNotStrict:!accessing!public! !
 connection!accessing!public! !

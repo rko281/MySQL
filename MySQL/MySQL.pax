@@ -9,7 +9,8 @@ Based on the Pharo implementation from https://github.com/pharo-rdbms
 https://github.com/rko281/MySQL'.
 
 package classNames
-	add: #MySQL323Scramble;
+	add: #MySQLAuthMoreData;
+	add: #MySQLAuthSwitch;
 	add: #MySQLBinaryReader;
 	add: #MySQLBinaryRowData;
 	add: #MySQLBindError;
@@ -56,14 +57,18 @@ package classNames
 	add: #MySQLResultSetHeader;
 	add: #MySQLRowData;
 	add: #MySQLServerStatus;
+	add: #MySQLSha2ClientAuth;
 	add: #MySQLStatementError;
 	add: #MySQLStringRowData;
 	add: #MySQLTypes;
-	add: #MySQLUnsuportedAuthError;
+	add: #MySQLUnsupportedAuthError;
 	add: #MySQLUnsupportedProtocolError;
 	yourself.
 
 package methodNames
+	add: #BCryptLibrary -> #bCryptHash:pbSecret:cbSecret:pbInput:cbInput:pbOutput:cbOutput:;
+	add: #BCryptLibrary -> #hash:algorithm:length:;
+	add: #BCryptLibrary -> #sha256Hash:;
 	add: #ByteArray -> #mySQLParamTypeFor:;
 	add: #Character -> #asByteArray;
 	add: #Character -> #mySQLParamTypeFor:;
@@ -99,7 +104,8 @@ package setPrerequisites: #(
 	'..\Core\Object Arts\Dolphin\Base\Dolphin Legacy Date & Time'
 	'..\Core\Object Arts\Dolphin\Sockets\Dolphin Sockets'
 	'..\Core\Object Arts\Dolphin\DolphinSure\DolphinSure'
-	'..\Core\Contributions\svenc\STON\STON-Core').
+	'..\Core\Contributions\svenc\STON\STON-Core'
+	'..\OpenSSL\TLS Sockets').
 
 package!
 
@@ -161,7 +167,7 @@ Object subclass: #MySQLNetworkSession
 
 Object subclass: #MySQLPacket
 	instanceVariableNames: 'inStream discriminator'
-	classVariableNames: 'CapCompress CapConnectWithDb CapFoundRows CapIgnoreSigpipe CapIgnoreSpace CapInteractive CapLocalFiles CapLongFlag CapLongPassword CapMultiResults CapMultiStatements CapNoSchema CapOdbc CapProtocol41 CapReserved CapSecureConnection CapSsl CapTransactions'
+	classVariableNames: 'CapClientPluginAuth CapCompress CapConnectWithDb CapFoundRows CapIgnoreSigpipe CapIgnoreSpace CapInteractive CapLocalFiles CapLongFlag CapLongPassword CapMultiResults CapMultiStatements CapNoSchema CapOdbc CapProtocol41 CapReserved CapSecureConnection CapSsl CapTransactions'
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
 
@@ -175,7 +181,7 @@ Object subclass: #MySQLTypes
 	instanceVariableNames: ''
 	classVariableNames: 'TypeBIT TypeBLOB TypeDATE TypeDATETIME TypeDECIMAL TypeDOUBLE TypeENUM TypeFLOAT TypeGEOMETRY TypeINT24 TypeJSON TypeLONG TypeLONGBLOB TypeLONGLONG TypeMEDIUMBLOB TypeNEWDATE TypeNEWDECIMAL TypeNULL TypeSET TypeSHORT TypeSTRING TypeTIME TypeTIMESTAMP TypeTINY TypeTINYBLOB TypeVARCHAR TypeVARSTRING TypeYEAR'
 	poolDictionaries: ''
-	classInstanceVariableNames: 'blobTypes dateTimeTypes integerTypes stringTypes realTypes'!
+	classInstanceVariableNames: ''!
 
 Error subclass: #MySQLDriverError
 	instanceVariableNames: ''
@@ -219,7 +225,7 @@ MySQLDriverError subclass: #MySQLStatementError
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
 
-MySQLDriverError subclass: #MySQLUnsuportedAuthError
+MySQLDriverError subclass: #MySQLUnsupportedAuthError
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
@@ -232,7 +238,7 @@ MySQLDriverError subclass: #MySQLUnsupportedProtocolError
 	classInstanceVariableNames: ''!
 
 MySQLCommandBase subclass: #MySQLCommandChangeUser
-	instanceVariableNames: 'user password database charset scrambleBuff scrambledPassword'
+	instanceVariableNames: 'connSpec driver'
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
@@ -309,8 +315,14 @@ MySQLCommandWithStatement subclass: #MySQLCommandFetch
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
 
-MySQLPacket subclass: #MySQL323Scramble
-	instanceVariableNames: 'scrambleBuff password'
+MySQLPacket subclass: #MySQLAuthMoreData
+	instanceVariableNames: 'value'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLPacket subclass: #MySQLAuthSwitch
+	instanceVariableNames: 'pluginName scrambleBuff password'
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
@@ -340,7 +352,7 @@ MySQLPacket subclass: #MySQLField
 	classInstanceVariableNames: ''!
 
 MySQLPacket subclass: #MySQLHandshake
-	instanceVariableNames: 'protocolVer serverVer threadId scrambleBuff serverCap serverLang scrambleBuffMore serverStatus'
+	instanceVariableNames: 'protocolVer serverVer threadId scrambleBuff serverCap serverLang scrambleBuffMore serverStatus pluginName'
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
@@ -365,6 +377,12 @@ MySQLPacket subclass: #MySQLResultSetHeader
 
 MySQLPacket subclass: #MySQLRowData
 	instanceVariableNames: 'columnValues'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+
+MySQLClientAuth subclass: #MySQLSha2ClientAuth
+	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
@@ -418,6 +436,51 @@ MySQLBinaryRowData subclass: #MySQLStringRowData
 	classInstanceVariableNames: ''!
 
 "Loose Methods"!
+
+!BCryptLibrary methodsFor!
+
+bCryptHash: hAlgorithm pbSecret: pbSecret cbSecret: cbSecret pbInput: pbInput cbInput: cbInput pbOutput: pbOutput cbOutput: cbOutput
+	"Invoke the BCryptHash() function of the module wrapped by the receiver.
+	Helpstring: Performs a single hash computation. This is a convenience function that wraps calls to BCryptCreateHash, BCryptHashData, BCryptFinishHash, and BCryptDestroyHash.
+
+		NTSTATUS __stdcall BCryptHash(
+			BCRYPT_ALG_HANDLE hAlgorithm,
+			UCHAR* pbSecret,
+			ULONG cbSecret,
+			UCHAR* pbInput,
+			ULONG cbInput,
+			UCHAR* pbOutput,
+			ULONG cbOutput);"
+
+	<stdcall: ntstatus BCryptHash handle byte* dword byte* dword byte* dword>
+	^self invalidCall: _failureCode!
+
+hash: aByteArray algorithm: aHandle length: anInteger
+	| hashBytes |
+	hashBytes := ByteArray newFixed: anInteger.
+	self
+		bCryptHash: aHandle
+		pbSecret: nil
+		cbSecret: 0
+		pbInput: aByteArray
+		cbInput: aByteArray size
+		pbOutput: hashBytes
+		cbOutput: anInteger.
+	^hashBytes!
+
+sha256Hash: aByteArray
+	"Answer a 32-byte <ByteArray> containing the SHA256 hash of the <ByteArray> argument."
+
+	^self
+		hash: aByteArray
+		algorithm: 65 "BCRYPT_SHA256_ALG_HANDLE"
+		length: ##(256 / 8)! !
+
+!BCryptLibrary categoriesForMethods!
+bCryptHash:pbSecret:cbSecret:pbInput:cbInput:pbOutput:cbOutput:!hashing!public! !
+hash:algorithm:length:!hashing!public! !
+sha256Hash:!hashing!public! !
+!
 
 !ByteArray methodsFor!
 

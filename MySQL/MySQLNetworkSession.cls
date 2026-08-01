@@ -39,6 +39,10 @@ getSequenceAndIncrement
 
 initialize	self resetSequence.!
 
+isSecureConnection
+
+	^socket isSecureConnection!
+
 onConnected
 
 	inputQueue := SharedQueue new.
@@ -79,14 +83,22 @@ readPacketData
 
 resetSequence	nextPacketNumber := 0!
 
+secureConnection
+
+	socket secureConnection!
+
 toHost: host andPort: port 
 	
 	self resetSequence.
-	[socket := Socket2 port: port host: host.
+	[socket := TlsSocket port: port host: host.
+	socket 
+		shouldSecureOnConnect: false;
+		isOverlapped: false; "blocking database calls - same as ODBC and SQLite"
+		connect.
 	"Turn off Nagle algorithm, else response time to short packets would suffer. Thanks to
 	Goran Krampe for studying the issue in Ubuntu linux and figure out the details. Ref:
 	http://developers.slashdot.org/comments.pl?sid=174457&threshold=1&commentsort=0&mode=thread&cid=14515105 for comments from John Nagle himself."
-	socket connect.
+	socket setBooleanOption: 1 "TCP_NODELAY" level: "IPPROTO_TCP" 6 value: true.
 	self onConnected] 
 			on: SocketError do: [:ex | MySQLNameLookupFailure signal: ex messageText] !
 
@@ -132,12 +144,14 @@ executeCommand:!helpers!public! !
 getSequence!public!sequence numbering! !
 getSequenceAndIncrement!public!sequence numbering! !
 initialize!initialize/release!public! !
+isSecureConnection!public!testing! !
 onConnected!helpers!public! !
 peek!public!reading! !
 read!public!reading! !
 readNetPacket!public!reading! !
 readPacketData!public!reading! !
 resetSequence!public!sequence numbering! !
+secureConnection!helpers!public! !
 toHost:andPort:!accessing!public! !
 updateSequence!public!sequence numbering! !
 validatePacket:!public!reading! !

@@ -20,15 +20,16 @@ setUp	theParam := MySQLBindParameter new.	!
 
 storeBinary	ByteArray streamContents: [:strm | 		theParam storeBinaryOn: strm.		^ strm contents]		!
 
-testParamDate	theParam bindValue: (Date fromString: '06-21-2011' format: 'mm-dd-yyyy').	self assert: (theParam detectParamType = MySQLTypes typeDATE).	self assert: theParam isUnsigned.		!
+testParamDate	theParam bindValue: (Date fromString: '06-21-2011' format: 'mm-dd-yyyy').	self assert: (theParam detectParamType = MySQLTypes.TypeDATE).	self assert: theParam isUnsigned.		!
 
-testParamDateTime	theParam bindValue: DateAndTime now.	self assert: (theParam detectParamType = MySQLTypes typeDATETIME).	self assert: theParam isUnsigned.	!
+testParamDateTime	theParam bindValue: DateAndTime now.	self assert: (theParam detectParamType = MySQLTypes.TypeDATETIME).	self assert: theParam isUnsigned.	!
 
-testParamDuration	theParam bindValue: (Duration fromString: '10:02:30:45').	self assert: (theParam detectParamType = MySQLTypes typeTIME).	self assert: theParam isUnsigned.	theParam bindValue: (Duration fromString: '-10:02:30:45').	self assert: (theParam detectParamType = MySQLTypes typeTIME).	self assert: theParam isUnsigned not.	!
+testParamDuration	theParam bindValue: (Duration fromString: '10:02:30:45').	self assert: (theParam detectParamType = MySQLTypes.TypeTIME).	self assert: theParam isUnsigned.	theParam bindValue: (Duration fromString: '-10:02:30:45').	self assert: (theParam detectParamType = MySQLTypes.TypeTIME).	self assert: theParam isUnsigned not.	!
 
-testParamTime	theParam bindValue: Time now.	self assert: (theParam detectParamType = MySQLTypes typeTIME).	self assert: theParam isUnsigned.	!
+testParamTime	theParam bindValue: Time now.	self assert: (theParam detectParamType = MySQLTypes.TypeTIME).	self assert: theParam isUnsigned.	!
 
-testParamTimestamp	"Currently an expected failure - this directly contradicts testParamDateTime.	Needs an explicit Timestamp class to map to MySQL typeTIMESTAMP"true ifTrue: [^self].	theParam bindValue: DateAndTime now.	self assert: (theParam detectParamType = MySQLTypes typeTIMESTAMP).	self assert: theParam isUnsigned.	!
+testParamTimestamp	"Currently an expected failure - this directly contradicts testParamDateTime.	Needs an explicit Timestamp class to map to MySQL typeTIMESTAMP"	true ifTrue: [^self].
+	theParam bindValue: DateAndTime now.	self assert: (theParam detectParamType = MySQLTypes.TypeTIMESTAMP).	self assert: theParam isUnsigned.	!
 
 testStoreBinaryDate	theParam bindValue: (Date fromString: '06-21-2011' format: 'mm-dd-yyyy').	self assert: (MySQLHelper hexStringFromBytes: self storeBinary) equals: '04DB070615'	!
 

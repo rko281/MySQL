@@ -18,13 +18,13 @@ setUp	theParam := MySQLBindParameter new	!
 
 storeBinary	ByteArray streamContents: [:strm | 		theParam storeBinaryOn: strm.		^ strm contents]	!
 
-testParamDecimal	theParam bindValue: 12345.678901s6.	self assert: theParam paramType = MySQLTypes typeDECIMAL.	self assert: theParam isUnsigned.		theParam bindValue: -12345.678901s6.	self assert: theParam paramType = MySQLTypes typeDECIMAL.	self deny: theParam isUnsigned.!
+testParamDecimal	theParam bindValue: 12345.678901s6.	self assert: theParam paramType = MySQLTypes.TypeDECIMAL.	self assert: theParam isUnsigned.		theParam bindValue: -12345.678901s6.	self assert: theParam paramType = MySQLTypes.TypeDECIMAL.	self deny: theParam isUnsigned.!
 
-testParamDouble	theParam bindValue: 123456789123456789.123456789.	self assert: theParam paramType = MySQLTypes typeDOUBLE.	self assert: theParam isUnsigned.		theParam bindValue: -123456789123456789.123456789.	self assert: theParam paramType = MySQLTypes typeDOUBLE.	self deny: theParam isUnsigned.!
+testParamDouble	theParam bindValue: 123456789123456789.123456789.	self assert: theParam paramType = MySQLTypes.TypeDOUBLE.	self assert: theParam isUnsigned.		theParam bindValue: -123456789123456789.123456789.	self assert: theParam paramType = MySQLTypes.TypeDOUBLE.	self deny: theParam isUnsigned.!
 
-testParamFloat	theParam bindValue: 65.0.	self assert: theParam paramType = MySQLTypes typeDOUBLE.	self assert: theParam isUnsigned.	theParam bindValue: -65.0.	self assert: theParam paramType = MySQLTypes typeDOUBLE.	self deny: theParam isUnsigned.	!
+testParamFloat	theParam bindValue: 65.0.	self assert: theParam paramType = MySQLTypes.TypeDOUBLE.	self assert: theParam isUnsigned.	theParam bindValue: -65.0.	self assert: theParam paramType = MySQLTypes.TypeDOUBLE.	self deny: theParam isUnsigned.	!
 
-testParamFraction	theParam bindValue: 100/3.	self assert: theParam paramType = MySQLTypes typeDOUBLE.	self assert: theParam isUnsigned.	theParam bindValue: -100/3.	self assert: theParam paramType = MySQLTypes typeDOUBLE.	self deny: theParam isUnsigned.		theParam bindValue: 17/4.	self assert: theParam paramType = MySQLTypes typeDOUBLE.	self assert: theParam isUnsigned.		theParam bindValue: -17/4.	self assert: theParam paramType = MySQLTypes typeDOUBLE.	self deny: theParam isUnsigned.	!
+testParamFraction	theParam bindValue: 100/3.	self assert: theParam paramType = MySQLTypes.TypeDOUBLE.	self assert: theParam isUnsigned.	theParam bindValue: -100/3.	self assert: theParam paramType = MySQLTypes.TypeDOUBLE.	self deny: theParam isUnsigned.		theParam bindValue: 17/4.	self assert: theParam paramType = MySQLTypes.TypeDOUBLE.	self assert: theParam isUnsigned.		theParam bindValue: -17/4.	self assert: theParam paramType = MySQLTypes.TypeDOUBLE.	self deny: theParam isUnsigned.	!
 
 testStoreBinarySignedDecimal	theParam bindValue: -12345.678901s6.	ByteArray streamContents: [:strm | 		theParam storeBinaryOn: strm.		self assert: strm contents asString equals: ((String with: (Character value: 13 "Length")), '-12345.678901')]	!
 

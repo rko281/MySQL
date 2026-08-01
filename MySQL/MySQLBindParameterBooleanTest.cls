@@ -18,7 +18,7 @@ setUp	theParam := MySQLBindParameter new.	!
 
 storeBinary	ByteArray streamContents: [:strm | 		theParam storeBinaryOn: strm.		^ strm contents]		!
 
-testParamBoolean	theParam bindValue: true.	self assert: (theParam detectParamType = MySQLTypes typeTINY).	self assert: theParam isUnsigned.	theParam bindValue: false.	self assert: (theParam detectParamType = MySQLTypes typeTINY).	self assert: theParam isUnsigned.!
+testParamBoolean	theParam bindValue: true.	self assert: (theParam detectParamType = MySQLTypes.TypeTINY).	self assert: theParam isUnsigned.	theParam bindValue: false.	self assert: (theParam detectParamType = MySQLTypes.TypeTINY).	self assert: theParam isUnsigned.!
 
 testParamStoreBinaryBoolean	theParam bindValue: true.	self assert: (self storeBinary = (ByteArray with: 16r01)).	theParam bindValue: false.	self assert: (self storeBinary = (ByteArray with: 16r00)).! !
 

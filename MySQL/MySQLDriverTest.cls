@@ -28,6 +28,26 @@ testConnectAssorted	| connSpec |		connSpec := self goodConnectionSpec .	self
 
 testConnectBad	| connSpec |	connSpec := self badConnectionSpec .	self assert: (connector connect: connSpec) isError .	!
 
+testConnectCachingSha2
+
+	"Test connecting as a user who requires caching_sha2_password authentication"
+
+	self _createCachingSha2User: 
+		[ :connectionSpec || connection |
+		connectionSpec useSecureConnection.
+		connection := MySQLDriver new.
+		self assert: (connection connect: connectionSpec) isOkay.
+		connection  disconnect]!
+
+testConnectCachingSha2OnUnsecuredConnection
+
+	"Test connecting as a user who requires caching_sha2_password authentication fails on an unsecured connection"
+
+	self _createCachingSha2User: 
+		[ :connectionSpec |
+		connectionSpec useUnsecuredConnection.
+		self should: [MySQLDriver new connect: connectionSpec] raise: MySQLDriverError]!
+
 testConnectGood	| connSpec resp |		connSpec := self goodConnectionSpec.	resp := connector connect: connSpec.	self assert: resp isOkay.	!
 
 testConnectWithDb	| connSpec resp |	connSpec := self goodConnectionSpec.	connSpec db: MySQLTestResource dbName.	resp := connector connect: connSpec.	self assert: resp isOkay.	connector disconnect.	connSpec db: MySQLTestResource dbName reverse.	self assert: (connector connect: connSpec) isError.	connector connected ifTrue: [ connector disconnect].!
@@ -44,6 +64,8 @@ setUp!public!running! !
 tearDown!public!running! !
 testConnectAssorted!public!tests! !
 testConnectBad!public!tests! !
+testConnectCachingSha2!public!tests! !
+testConnectCachingSha2OnUnsecuredConnection!public!tests! !
 testConnectGood!public!tests! !
 testConnectWithDb!public!tests! !
 testDisconnect!public!tests! !

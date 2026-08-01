@@ -2,7 +2,7 @@
 
 Object subclass: #MySQLPacket
 	instanceVariableNames: 'inStream discriminator'
-	classVariableNames: 'CapCompress CapConnectWithDb CapFoundRows CapIgnoreSigpipe CapIgnoreSpace CapInteractive CapLocalFiles CapLongFlag CapLongPassword CapMultiResults CapMultiStatements CapNoSchema CapOdbc CapProtocol41 CapReserved CapSecureConnection CapSsl CapTransactions'
+	classVariableNames: 'CapClientPluginAuth CapCompress CapConnectWithDb CapFoundRows CapIgnoreSigpipe CapIgnoreSpace CapInteractive CapLocalFiles CapLongFlag CapLongPassword CapMultiResults CapMultiStatements CapNoSchema CapOdbc CapProtocol41 CapReserved CapSecureConnection CapSsl CapTransactions'
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
 
@@ -21,6 +21,12 @@ decodeLcsFrom: aStream 	^ MySQLHelper decodeLcsFrom: aStream 	!
 encodeLcb: value on: aStream 	^ MySQLHelper encodeLcb: value on: aStream 	!
 
 encodeLcs: bytes on: aStream	MySQLHelper encodeLcs: bytes on: aStream	!
+
+isAuthMoreData
+
+	^discriminator = 1!
+
+isAuthSwitch	^ discriminator = 16rFE!
 
 isEof	^ (discriminator = 16rFE) and: [inStream size < 9]!
 
@@ -43,6 +49,8 @@ decodeLcbFrom:!parsing!public! !
 decodeLcsFrom:!parsing!public! !
 encodeLcb:on:!parsing!public! !
 encodeLcs:on:!parsing!public! !
+isAuthMoreData!public!testing! !
+isAuthSwitch!public!testing! !
 isEof!public!testing! !
 isError!public!testing! !
 isOkay!public!testing! !
@@ -57,7 +65,7 @@ read:!public!reading! !
 
 from: data	^ self new 		read: data	!
 
-initCapabilititesFlags	CapLongPassword := 1.	CapFoundRows := 1 bitShift: 1.	CapLongFlag := 1 bitShift: 2.	CapConnectWithDb := 1 bitShift: 3.	CapNoSchema := 1 bitShift: 4.	CapCompress := 1 bitShift: 5.	CapOdbc := 1 bitShift: 6.	CapLocalFiles := 1 bitShift: 7.	CapIgnoreSpace := 1 bitShift: 8.	CapProtocol41 := 1 bitShift: 9.	CapInteractive := 1 bitShift: 10.	CapSsl := 1 bitShift: 11.	CapIgnoreSigpipe := 1 bitShift: 12.	CapTransactions := 1 bitShift: 13.	CapReserved := 1 bitShift: 14.	CapSecureConnection := 1 bitShift: 15.	CapMultiStatements := 1 bitShift: 16.	CapMultiResults := 1 bitShift: 17.!
+initCapabilititesFlags	CapLongPassword := 1.	CapFoundRows := 1 bitShift: 1.	CapLongFlag := 1 bitShift: 2.	CapConnectWithDb := 1 bitShift: 3.	CapNoSchema := 1 bitShift: 4.	CapCompress := 1 bitShift: 5.	CapOdbc := 1 bitShift: 6.	CapLocalFiles := 1 bitShift: 7.	CapIgnoreSpace := 1 bitShift: 8.	CapProtocol41 := 1 bitShift: 9.	CapInteractive := 1 bitShift: 10.	CapSsl := 1 bitShift: 11.	CapIgnoreSigpipe := 1 bitShift: 12.	CapTransactions := 1 bitShift: 13.	CapReserved := 1 bitShift: 14.	CapSecureConnection := 1 bitShift: 15.	CapMultiStatements := 1 bitShift: 16.	CapMultiResults := 1 bitShift: 17.	CapClientPluginAuth := (1 bitShift: 19)!
 
 initialize	"	self initialize	"	self initCapabilititesFlags.!
 

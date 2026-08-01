@@ -16,6 +16,19 @@ MySQLCommandsTest comment: ''!
 
 testChangeUser	| spec altSpec conn |	spec := self driverSpec.	spec db: nil.	altSpec := spec copy.	altSpec user: self class resourceClass alternativeUsername.	conn := self connection.		self assert: (conn changeUser: altSpec) isOkay.	self assert: (conn changeUser: spec) isOkay.	self assert: (conn changeUser: altSpec) isOkay.	self assert: (conn changeUser: spec) isOkay.	conn disconnect.	self should: [conn changeUser: spec] raise: MySQLNoConnectionError. !
 
+testChangeUserOnUnsecuredConnection
+
+	"Test connecting as a user who requires caching_sha2_password authentication fails on an unsecured connection"
+
+	self _createNativePasswordUser: 
+		[ :nativeConnectionSpec || connection |
+		nativeConnectionSpec useUnsecuredConnection.
+		connection := MySQLDriver new.
+		connection connect: nativeConnectionSpec.
+		self _createCachingSha2User: 
+			[ :connectionSpec |
+			self should: [connection changeUser: connectionSpec] raise: MySQLUnsupportedProtocolError]]!
+
 testDescribeTable	| results |	results := self connection query: 'describe nameValue'.	self assert: (results rows size = 3).!
 
 testPing	| conn |	conn := self connection.	self assert: conn ping isOkay.	conn disconnect.	self should: [conn ping] raise: MySQLNoConnectionError !
@@ -28,6 +41,7 @@ testStmtPrepare	| resp conn |	conn := self connection.	resp := conn query: 'i
 
 !MySQLCommandsTest categoriesForMethods!
 testChangeUser!public!tests! !
+testChangeUserOnUnsecuredConnection!public!tests! !
 testDescribeTable!public!tests! !
 testPing!public!tests! !
 testStmtClose!public!tests! !

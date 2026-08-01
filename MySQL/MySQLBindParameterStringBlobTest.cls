@@ -18,9 +18,9 @@ setUp	theParam := MySQLBindParameter new.	!
 
 storeBinary	ByteArray streamContents: [:strm | 		theParam storeBinaryOn: strm.		^ strm contents]		!
 
-testParamBlob	theParam bindValue: (ByteArray new: 16rFF withAll: 16rAA).	self assert: (theParam detectParamType = MySQLTypes typeTINYBLOB).	self assert: theParam isUnsigned.	theParam bindValue: (ByteArray new: 16rFFFF withAll: 16r55).	self assert: (theParam detectParamType = MySQLTypes typeBLOB).	self assert: theParam isUnsigned.	theParam bindValue: (ByteArray new: 16r20000 withAll: 16rAA).	self assert: (theParam detectParamType = MySQLTypes typeMEDIUMBLOB).	self assert: theParam isUnsigned.	theParam bindValue: (ByteArray new: 16r1000000 withAll: 16r55).	self assert: (theParam detectParamType = MySQLTypes typeLONGBLOB).	self assert: theParam isUnsigned.		!
+testParamBlob	theParam bindValue: (ByteArray new: 16rFF withAll: 16rAA).	self assert: (theParam detectParamType = MySQLTypes.TypeTINYBLOB).	self assert: theParam isUnsigned.	theParam bindValue: (ByteArray new: 16rFFFF withAll: 16r55).	self assert: (theParam detectParamType = MySQLTypes.TypeBLOB).	self assert: theParam isUnsigned.	theParam bindValue: (ByteArray new: 16r20000 withAll: 16rAA).	self assert: (theParam detectParamType = MySQLTypes.TypeMEDIUMBLOB).	self assert: theParam isUnsigned.	theParam bindValue: (ByteArray new: 16r1000000 withAll: 16r55).	self assert: (theParam detectParamType = MySQLTypes.TypeLONGBLOB).	self assert: theParam isUnsigned.		!
 
-testParamCharacter	theParam bindValue: $A.	self assert: (theParam detectParamType = MySQLTypes typeSTRING).	self assert: theParam isUnsigned.!
+testParamCharacter	theParam bindValue: $A.	self assert: (theParam detectParamType = MySQLTypes.TypeSTRING).	self assert: theParam isUnsigned.!
 
 testParamStoreBinaryCharacter	theParam bindValue: $A.	"lengthcoded + charcter as string"	self assert: (self storeBinary = (ByteArray with: 1 with: 16r41)).!
 
@@ -28,9 +28,9 @@ testParamStoreBinaryString	| value binStrm |	theParam bindValue: 'hello'.	"le
 
 testParamStoreBinarySymbol	theParam bindValue: #hello.	"lengthcoded + string bytes"	self assert: (self storeBinary = ((ByteArray with: 5), 'hello' asByteArray)).!
 
-testParamString	theParam bindValue: 'Smalltalk is awesome'.	self assert: (theParam detectParamType = MySQLTypes typeVARSTRING).	self assert: theParam isUnsigned.	!
+testParamString	theParam bindValue: 'Smalltalk is awesome'.	self assert: (theParam detectParamType = MySQLTypes.TypeVARSTRING).	self assert: theParam isUnsigned.	!
 
-testParamSymbol	theParam bindValue: #'Symbols are special'.	self assert: (theParam detectParamType = MySQLTypes typeVARSTRING).	self assert: theParam isUnsigned.	! !
+testParamSymbol	theParam bindValue: #'Symbols are special'.	self assert: (theParam detectParamType = MySQLTypes.TypeVARSTRING).	self assert: theParam isUnsigned.	! !
 
 !MySQLBindParameterStringBlobTest categoriesForMethods!
 setUp!public!running! !
