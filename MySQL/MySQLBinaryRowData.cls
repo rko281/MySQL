@@ -57,7 +57,7 @@ readColumnFrom: aStream perDescription: columnDescr
 	type = MySQLTypes.TypeTIME ifTrue: [^reader timeFrom: aStream].
 	type = MySQLTypes.TypeDATE ifTrue: [^reader dateFrom: aStream].
 	type = MySQLTypes.TypeDATETIME ifTrue: [^reader dateTimeFrom: aStream].
-	type = MySQLTypes.TypeTIMESTAMP ifTrue: [^reader timeStampFrom: aStream].
+	type = MySQLTypes.TypeTIMESTAMP ifTrue: [^reader dateTimeTimezoneAwareFrom: aStream].
 	type = MySQLTypes.TypeYEAR ifTrue: [^reader yearFrom: aStream].
 	
 	(type = MySQLTypes.TypeTINYBLOB or: [type = MySQLTypes.TypeBLOB or: [type = MySQLTypes.TypeMEDIUMBLOB or: [type = MySQLTypes.TypeLONGBLOB]]]) ifTrue: [^columnDescr readStringOrByteArrayFrom: aStream].

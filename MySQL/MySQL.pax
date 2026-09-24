@@ -112,7 +112,7 @@ package!
 "Class Definitions"!
 
 Object subclass: #MySQLBinaryReader
-	instanceVariableNames: ''
+	instanceVariableNames: 'utcOffset'
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: 'defaultInstance'!

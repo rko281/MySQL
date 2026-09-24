@@ -38,7 +38,7 @@ indexOfFieldNamed: aName
 parse	| indx |	indx := 1.	[inStream atEnd] whileFalse: [| value field |		field := fields at: indx.		value := self readColumnFrom: inStream perDescription: field.		columnValues at: indx put: value.		indx := indx + 1].	!
 
 readColumnFrom: aStream perDescription: columnDescr
-	| string stream date time |
+	| string stream |
 	string := (self decodeLcsFrom: aStream) ifNil: [^nil] ifNotNil: [:s | Utf8String fromByteArray: s].
 	stream := string readStream.
 	columnDescr type  = MySQLTypes.TypeTINY ifTrue: [^Integer readFrom: stream].
@@ -56,15 +56,9 @@ readColumnFrom: aStream perDescription: columnDescr
 	columnDescr type = MySQLTypes.TypeVARCHAR ifTrue: [^string].
 	columnDescr type = MySQLTypes.TypeVARSTRING ifTrue: [^string].
 	
-	columnDescr type = MySQLTypes.TypeTIME ifTrue: [^Time readFrom: stream].
+	columnDescr type = MySQLTypes.TypeTIME ifTrue: [^Time readFromNegativeTolerant: stream].
 	columnDescr type = MySQLTypes.TypeDATE ifTrue: [^Date readFrom: stream format: 'yyyy-mm-dd'].
-	(columnDescr type = MySQLTypes.TypeDATETIME or: [columnDescr type = MySQLTypes.TypeTIMESTAMP or: [columnDescr type = MySQLTypes.TypeNEWDATE]]) ifTrue: 
-		[date := Date readFrom: stream format: 'yyyy-mm-dd'.
-		stream next.
-		time := Time readFrom: stream.
-		^columnDescr type = MySQLTypes.TypeTIMESTAMP
-			ifTrue: [TimeStamp date: date time: time]
-			ifFalse: [DateAndTime fromDate: date time: time]].
+	(columnDescr type = MySQLTypes.TypeDATETIME or: [columnDescr type = MySQLTypes.TypeTIMESTAMP or: [columnDescr type = MySQLTypes.TypeNEWDATE]]) ifTrue: [^DateAndTime readFrom: stream].
 	columnDescr type = MySQLTypes.TypeYEAR ifTrue: [^Integer readFrom: stream].
 	
 	columnDescr type = MySQLTypes.TypeBIT ifTrue: [^Integer readFrom: stream].

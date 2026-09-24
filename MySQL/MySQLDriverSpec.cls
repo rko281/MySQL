@@ -14,47 +14,58 @@ MySQLDriverSpec comment: 'Driver specification'!
 
 !MySQLDriverSpec methodsFor!
 
-database: dbName	database := dbName!
+database: dbName
+	database := dbName!
 
-db	^ database!
+db
+	^database!
 
-db: dbName	database := dbName!
+db: dbName
+	database := dbName!
 
-host	^ host!
+host
+	^host!
 
-host: server	host := server!
+host: server
+	host := server!
 
 initialize
+	options := 0.
 
-	options := 0!
+	"We default to secure since current versions of MySQL require this for user authentication"
+	self useSecureConnection!
 
 isSecureConnection
-
 	^(options bitAnd: MySQLPacket.CapSsl) = MySQLPacket.CapSsl!
 
 options
 	^options!
 
-options: driverOptions	options := driverOptions!
+options: driverOptions
+	options := driverOptions!
 
-password	^ password!
+password
+	^password!
 
-password: userPassword	password := userPassword!
+password: userPassword
+	password := userPassword!
 
-port	^ port ifNil: [ port := 3306 ]!
+port
+	^port ifNil: [port := 3306]!
 
-port: serverPort	port := serverPort!
+port: serverPort
+	port := serverPort!
 
-user	^ user!
+user
+	^user!
 
-user: userName	user := userName!
+user: userName
+	user := userName!
 
 useSecureConnection
-
 	options := options bitOr: MySQLPacket.CapSsl!
 
 useUnsecuredConnection
-
 	self isSecureConnection ifTrue: [options := options - MySQLPacket.CapSsl]! !
 
 !MySQLDriverSpec categoriesForMethods!
@@ -80,7 +91,6 @@ useUnsecuredConnection!initializing!public! !
 !MySQLDriverSpec class methodsFor!
 
 new
-
 	^super new initialize! !
 
 !MySQLDriverSpec class categoriesForMethods!
